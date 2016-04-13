@@ -1,5 +1,5 @@
 # CPUProject
-C based CPU at the registry level
+C based CPU project  at the registry level
 
 load function
 ...
