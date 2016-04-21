@@ -1,5 +1,5 @@
 # CPUProject
-C based CPU project based on the ARM Architecturel
+C based CPU project based on the ARM Architecture
 
 load function
 Loads a file into memory
