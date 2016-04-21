@@ -10,3 +10,6 @@ number of bytes you want to read
 
 Trace function
 Executes the Fetch instruction and displays the registries
+
+Fetch function 
+Reads one instruction at a time
