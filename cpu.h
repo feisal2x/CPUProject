@@ -25,12 +25,15 @@ void Trace();
 void Fetch();
 void InstructionSet();
 void RunProgram();
+int fourBits();
+int* regNum();
+int isCarry();
 
 static uint32_t  reg[REF_SIZE];
 
-static uint32_t  R0;
+static uint32_t  R0=10;
 static uint32_t  R1;
-static uint32_t  R2;
+static uint32_t  R2=7;
 static uint32_t  R3;
 static uint32_t  R4;
 static uint32_t  R5;

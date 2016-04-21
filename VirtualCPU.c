@@ -5,9 +5,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "cpu.h"
 
-main(){
+int main(){
     char choice;
     char memory[BUFFER_SIZE];
     int offset; //for dump memory where to start
@@ -57,6 +58,7 @@ while(1){
                     break;
             case 't':
             case 'T':
+    		    printf("nothing detected");
                     Trace(memory);
                     break;
             case 'r':
@@ -92,7 +94,7 @@ int LoadFile(void * memory, unsigned int max){
                     char fileN[30];
                     int bytesRead=0;
                     printf("Enter name of file\n");
-                    scanf("%s",&fileN);
+                    scanf("%s",fileN);
                    
                     printf("How much bytes do you want to read:\n");
                     scanf(" %d",&max);
@@ -110,8 +112,8 @@ int LoadFile(void * memory, unsigned int max){
                         fclose(f);
                         bytesRead=max*sizeof(char);
                        // printf("memory address: %p\n",&memory);
-                        printf("memory:\n%s",memory);
-                        printf("__________________________\n");
+                        printf("memory:\n%s",(char *)memory);
+                        printf("\n__________________________\n");
                         printf("bytes read: %d decimal || %xH\n", bytesRead,bytesRead);
                     }
                    return max;
@@ -226,52 +228,119 @@ void RegistryDisplay(){
    *
    */
  void Trace(void * memptr){
+    printf("nothing detected");
         Fetch(memptr);
-        InstructionSet(memptr);
+      //  InstructionSet(memptr);
        
         RegistryDisplay();
  }
 void Fetch(void * mem){
-    unsigned char *p=(unsigned char *)mem;
+    printf("nothing detected");
+    unsigned char *p = (unsigned char *)mem;
     MBR=0;
-    MAR=&p[PC];
-    
-    for(int i=PC;i<PC+5;i++){
-       // printf("%c\n",p[PC] );
-        if(i==PC && p[PC]=='1'){
-            MBR+=0x8;    
-        }
-        if(i==PC+1 && p[PC+1]=='1'){
-            MBR+=0x4;
-        }
-        if(i==PC+2 && p[PC+2]=='1'){
-            MBR+=0x2;    
-         }
+    MAR=(int) &p[PC];
+    IR1=0;
+     
+    for(int i=PC+12;i<PC+16;i++){
+	if(i==PC && p[PC]=='1'){
+		MBR+=0x8;
+		IR1+=8;
+	}
+	if(i==PC+1 && p[PC]=='1'){
+		MBR+=4;
+		IR1+=4;
+	}
+	if(i==PC+2 && p[PC]=='1'){
+		MBR+=2;
+		IR1+=2;
+	}
+	if(i==PC+3 && p[PC]=='1'){
+		MBR+=1;
+		IR1+=1;
+	}
+    }
+    IR0=IR1;
+  //  PC = PC+16;
+    //recognize instrucion types bit:8-11 
+    //IR1:0 is data processing
+    if(IR1==0){
+	    int code=fourBits(p,PC+8);
+	    printf("code is : %d",code);
+		int *Rd = regNum(fourBits(p,PC));
+		int A=*Rd;
+		printf("Rd: %d",A);
+		int *Rn = regNum(fourBits(p,PC+4));
+		int B=*Rn;
+		printf("Rn: %d",B);
 
-       if(i==PC+3 && p[PC+3]=='1'){
-            MBR+=0x1;
-        }
-        if(i==PC+4 && (p[PC+4]==' ' || p[PC+4]=='.')){
-           
-            PC=PC+0x1;
+	    if(code==4){ //code 4 is ADD
+	/*	
+		int *Rd = regNum(fourBits(p,PC));
+		int A=*Rd;
+		printf("Rd: %d",A);
+		int *Rn = regNum(fourBits(p,PC+4));
+		int B=*Rn;
+		printf("Rn: %d",B);
+	*/
+		*Rd=A+B;
+		 
+	    }
+	    if(code==2){ //code 2 is SUB
+		*Rd=A-B;		
+		
+	    }
+  	    int final=*Rd;
+	    flag_CARRY=isCarry(final);
+    }
 
-        }
-        if (p[PC+5]==' ' || p[PC+4]=='.')
-        {
-            PC=PC+0x1;
-        }
-        if(i==PC && (p[PC]==' ' || p[PC]=='.')){
-            printf("Nothing to step through\n");
-            MBR=99;
-            break;
-
-        }
+  // if()
+  
+   PC+=17;
+}
+int isCarry(int x)
+{
+    return x>MAX?1:0;
+}
 
 
-    }    
-PC=PC+0x5;
+int fourBits( char* p, int o)
+{
+
+	int a=0;
+	for(int i=0;i<4;i++)
+	{
+	  if(i==0 && p[o]=='1')
+		a+=1;	
+	  if(i==1 && p[o+i]=='1')
+		a+=2;
+	  if(i==2 && p[o+i]=='1')
+		a+=4;
+	  if(i==3 && p[o+i]=='1')
+		a+=8;
+	}
+	return a;
+
 
 }
+
+int* regNum(int a)
+{
+	if(a==0)return &R0;
+	if(a==1)return &R1;
+	if(a==2)return &R2;
+	if(a==3)return &R3;
+	if(a==4)return &R4;
+	if(a==5)return &R5;
+	if(a==6)return &R6;
+	if(a==7)return &R7;
+	if(a==8)return &R8;
+	if(a==9)return &R9;
+	if(a==10)return &R10;
+	if(a==11)return &R11;
+	if(a==12)return &R12;
+}
+
+
 void InstructionSet(void * mem){
     
 
