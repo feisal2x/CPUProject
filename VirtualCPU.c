@@ -1,16 +1,12 @@
 /**
- *Feisal Salim
+ *Created By:Feisal Salim & Wenzhong Zheng
  *Implementing the memory dump and the modify memory.
  */
- //changes in the branch
+
 #include <stdio.h>
-
 #include <stdlib.h>
-
 #include <string.h>
-//test
 #include <ctype.h>
-//test
 #include "cpu.h"
 
 int main(){
@@ -247,22 +243,32 @@ void Fetch(void * mem){
     IR1=0;
      
     for(int i=PC+12;i<PC+16;i++){
-	if(i==PC && p[PC]=='1'){
-		MBR+=0x8;
-		IR1+=8;
-	}
-	if(i==PC+1 && p[PC]=='1'){
-		MBR+=4;
-		IR1+=4;
-	}
-	if(i==PC+2 && p[PC]=='1'){
-		MBR+=2;
-		IR1+=2;
-	}
-	if(i==PC+3 && p[PC]=='1'){
-		MBR+=1;
-		IR1+=1;
-	}
+    	if(i==PC && p[PC]=='1'){
+    		MBR+=0x8;
+    		IR1+=8;
+    	}
+    	if(i==PC+1 && p[PC]=='1'){
+    		MBR+=4;
+    		IR1+=4;
+    	}
+    	if(i==PC+2 && p[PC]=='1'){
+    		MBR+=2;
+    		IR1+=2;
+    	}
+    	if(i==PC+3 && p[PC]=='1'){
+    		MBR+=1;
+    		IR1+=1;
+    	}
+        //for some reason I dont think it is working can you check this 
+        //logic and see if you can figure it out
+         if((i+1)==PC+16 && (p[PC+16]==' ' || p[PC+16]=='.')){ 
+            printf("true");          
+            PC=PC+1;
+        }
+         if ((i+2)==PC+17 && (p[PC+17]==' ' || p[PC+17]=='.')){
+             PC=PC+1;
+             printf("true");
+         }
     }
     IR0=IR1;
   //  PC = PC+16;
@@ -300,7 +306,7 @@ void Fetch(void * mem){
 
   // if()
   
-   PC+=17;
+   PC+=15;
 }
 int isCarry(int x)
 {
