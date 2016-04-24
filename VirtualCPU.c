@@ -1,8 +1,7 @@
 /**
- *Created By:Feisal Salim & Wenzhong Zheng
+ *Feisal Salim
  *Implementing the memory dump and the modify memory.
  */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -59,7 +58,6 @@ while(1){
                     break;
             case 't':
             case 'T':
-    		    printf("nothing detected");
                     Trace(memory);
                     break;
             case 'r':
@@ -229,84 +227,85 @@ void RegistryDisplay(){
    *
    */
  void Trace(void * memptr){
-    printf("nothing detected");
         Fetch(memptr);
       //  InstructionSet(memptr);
        
         RegistryDisplay();
  }
 void Fetch(void * mem){
-    printf("nothing detected");
     unsigned char *p = (unsigned char *)mem;
     MBR=0;
     MAR=(int) &p[PC];
     IR1=0;
      
-    for(int i=PC+12;i<PC+16;i++){
-    	if(i==PC && p[PC]=='1'){
-    		MBR+=0x8;
-    		IR1+=8;
-    	}
-    	if(i==PC+1 && p[PC]=='1'){
-    		MBR+=4;
-    		IR1+=4;
-    	}
-    	if(i==PC+2 && p[PC]=='1'){
-    		MBR+=2;
-    		IR1+=2;
-    	}
-    	if(i==PC+3 && p[PC]=='1'){
-    		MBR+=1;
-    		IR1+=1;
-    	}
-        //for some reason I dont think it is working can you check this 
-        //logic and see if you can figure it out
-         if((i+1)==PC+16 && (p[PC+16]==' ' || p[PC+16]=='.')){ 
-            printf("true");          
-            PC=PC+1;
-        }
-         if ((i+2)==PC+17 && (p[PC+17]==' ' || p[PC+17]=='.')){
-             PC=PC+1;
-             printf("true");
-         }
+    for(int i=PC;i<PC+4;i++){
+	if(i==PC && p[i]=='1'){
+		MBR+=0x8;
+		IR1+=8;
+	}
+	if(i==PC+1 && p[i]=='1'){
+		MBR+=4;
+		IR1+=4;
+	}
+	if(i==PC+2 && p[i]=='1'){
+		MBR+=2;
+		IR1+=2;
+	}
+	if(i==PC+3 && p[i]=='1'){
+		MBR+=1;
+		IR1+=1;
+	}
     }
     IR0=IR1;
-  //  PC = PC+16;
+	printf("\nPC:%d",PC);
     //recognize instrucion types bit:8-11 
     //IR1:0 is data processing
+	printf("\nIR1: %d",IR1);
     if(IR1==0){
-	    int code=fourBits(p,PC+8);
-	    printf("code is : %d",code);
-		int *Rd = regNum(fourBits(p,PC));
+	    int code=fourBits(p,PC+4);
+	    printf("\ncode is : %d",code);
+		int *Rd = regNum(fourBits(p,PC+12));
 		int A=*Rd;
-		printf("Rd: %d",A);
-		int *Rn = regNum(fourBits(p,PC+4));
+		printf("\nRd: %d",A);
+		int *Rn = regNum(fourBits(p,PC+8));
 		int B=*Rn;
-		printf("Rn: %d",B);
+		printf("\nRn: %d",B);
 
 	    if(code==4){ //code 4 is ADD
-	/*	
-		int *Rd = regNum(fourBits(p,PC));
-		int A=*Rd;
-		printf("Rd: %d",A);
-		int *Rn = regNum(fourBits(p,PC+4));
-		int B=*Rn;
-		printf("Rn: %d",B);
-	*/
-		*Rd=A+B;
-		 
+		*Rd=A+B;		
 	    }
 	    if(code==2){ //code 2 is SUB
 		*Rd=A-B;		
-		
 	    }
   	    int final=*Rd;
 	    flag_CARRY=isCarry(final);
     }
+   //IR1=2 is Load/Store
+   if(IR1==2){
+	printf("I'M doing loading");
+	int code=fourBits(p,PC+4);	
+	int *Rd= regNum(fourBits(p,PC+12));
+	int A=*Rd;
+	int B = fourBits(p,PC+8);
+	*Rd=B;
 
-  // if()
+   }
+   if(IR1>=15){
+	printf("\nStop instruction detected");
+	return;	
+   }
+   //Unconditional Branch
+   if(IR1==13 || IR1==12){
+	if(IR1==12){//BRA
+		int step = fourBits(p,PC+12);
+		PC=(step-2)*17;//each ins. takes 16 bits and a new line char
+		printf("\nGo back to instruction %d",step);
+	}
+
+   }
+
   
-   PC+=15;
+   PC+=17;
 }
 int isCarry(int x)
 {
@@ -321,13 +320,13 @@ int fourBits( char* p, int o)
 	for(int i=0;i<4;i++)
 	{
 	  if(i==0 && p[o]=='1')
-		a+=1;	
+		a+=8;	
 	  if(i==1 && p[o+i]=='1')
-		a+=2;
-	  if(i==2 && p[o+i]=='1')
 		a+=4;
+	  if(i==2 && p[o+i]=='1')
+		a+=2;
 	  if(i==3 && p[o+i]=='1')
-		a+=8;
+		a+=1;
 	}
 	return a;
 
