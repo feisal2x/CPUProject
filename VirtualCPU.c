@@ -1,9 +1,9 @@
 /**
- * Testing branch
- *Created By:Feisal Salim &Wenzhong Zheng
+ *Created By:Feisal Salim & Wenzhong Zheng
  *Implementing the memory dump and the modify memory.
+ *
  */
-//dfdf
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -292,10 +292,12 @@ void Fetch(void * mem){
 	*Rd=B;
 
    }
-   if(IR1>=15){
-	printf("\nStop instruction detected");
-	return;	
+   //IR1>=14 is stop instruction
+   if(IR1>=14){
+       printf("\nStop instrucion detected");
+       flag_STOP=1;
    }
+   
    //Unconditional Branch
    if(IR1==13 || IR1==12){
 	if(IR1==12){//BRA
@@ -397,7 +399,8 @@ void RunProgram(void *mem){
             Trace(mem);
         }
 
-   //testing 
+
+   
 }
 
 
